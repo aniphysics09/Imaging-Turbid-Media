@@ -1,0 +1,232 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
+# import libraries
+from datetime import datetime
+import random
+import tensorflow as tf
+import keras
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+from keras.models import Sequential
+from keras.preprocessing.image import ImageDataGenerator
+from keras.layers import BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+from keras.layers import Dropout
+from keras.utils import normalize, to_categorical
+from keras.optimizers import SGD
+from keras.metrics import MeanSquaredError
+from keras.metrics import MeanAbsoluteError
+from keras.metrics import R2Score
+from sklearn.metrics import r2_score
+
+from sklearn.model_selection import train_test_split
+
+# load data
+X_train, y_train = dataset_train
+X_test, y_test = dataset_test
+# X_train, X_test, y_train, y_test = train_test_split(dataset, test_size=0.20, random_state=0)
+###############################################################################
+IMG_WIDTH = 256
+IMG_HEIGHT = 256
+IMG_CHANNELS = 10
+
+# The U-net structure
+inputs = tf.keras.layers.Input((IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS))
+# s = tf.keras.layers.Lambda(lambda x: x / 255)(inputs) # if input data is not normalised
+s = inputs
+# Contraction path
+c1 = tf.keras.layers.Conv2D(
+    16, (3, 3), activation='relu', kernel_initializer='he_normal', padding='same')(s)
+c1 = tf.keras.layers.Dropout(0.1)(c1)
+c1 = tf.keras.layers.Conv2D(16, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c1)
+p1 = tf.keras.layers.MaxPooling2D((2, 2))(c1)
+
+c2 = tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(p1)
+c2 = tf.keras.layers.Dropout(0.1)(c2)
+c2 = tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c2)
+p2 = tf.keras.layers.MaxPooling2D((2, 2))(c2)
+
+c3 = tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(p2)
+c3 = tf.keras.layers.Dropout(0.2)(c3)
+c3 = tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c3)
+p3 = tf.keras.layers.MaxPooling2D((2, 2))(c3)
+
+c4 = tf.keras.layers.Conv2D(128, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(p3)
+c4 = tf.keras.layers.Dropout(0.2)(c4)
+c4 = tf.keras.layers.Conv2D(128, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c4)
+p4 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(c4)
+
+c5 = tf.keras.layers.Conv2D(256, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(p4)
+c5 = tf.keras.layers.Dropout(0.3)(c5)
+c5 = tf.keras.layers.Conv2D(256, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c5)
+
+# Expansive path
+u6 = tf.keras.layers.Conv2DTranspose(
+    128, (2, 2), strides=(2, 2), padding='same')(c5)
+u6 = tf.keras.layers.concatenate([u6, c4])
+c6 = tf.keras.layers.Conv2D(128, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(u6)
+c6 = tf.keras.layers.Dropout(0.2)(c6)
+c6 = tf.keras.layers.Conv2D(128, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c6)
+
+u7 = tf.keras.layers.Conv2DTranspose(
+    64, (2, 2), strides=(2, 2), padding='same')(c6)
+u7 = tf.keras.layers.concatenate([u7, c3])
+c7 = tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(u7)
+c7 = tf.keras.layers.Dropout(0.2)(c7)
+c7 = tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c7)
+
+u8 = tf.keras.layers.Conv2DTranspose(
+    32, (2, 2), strides=(2, 2), padding='same')(c7)
+u8 = tf.keras.layers.concatenate([u8, c2])
+c8 = tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(u8)
+c8 = tf.keras.layers.Dropout(0.1)(c8)
+c8 = tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c8)
+
+u9 = tf.keras.layers.Conv2DTranspose(
+    16, (2, 2), strides=(2, 2), padding='same')(c8)
+u9 = tf.keras.layers.concatenate([u9, c1], axis=3)
+c9 = tf.keras.layers.Conv2D(16, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(u9)
+c9 = tf.keras.layers.Dropout(0.1)(c9)
+c9 = tf.keras.layers.Conv2D(16, (3, 3), activation='relu',
+                            kernel_initializer='he_normal', padding='same')(c9)
+
+outputs = tf.keras.layers.Conv2D(1, (1, 1), activation='sigmoid')(c9)
+
+model_10 = tf.keras.Model(inputs=[inputs], outputs=[outputs])
+model_10.compile(optimizer='adam', loss='mse')
+model_10.summary()
+
+###############################################################################
+start1 = datetime.now()
+###############################################################################
+# Train the model
+history_10 = model_10.fit(X_train, y_train, batch_size=16, epochs=500, verbose=1,
+                        validation_data=(X_test, y_test))
+###############################################################################
+stop1 = datetime.now()
+# Execution time of the model
+execution_time = stop1-start1
+print("Execution time is: ", execution_time)
+###############################################################################
+#Save model .keras
+model_10.save('/home/lpt/Anindya/myModels_Trained/model_s10.keras')
+# load model
+model_10 = keras.models.load_model('/home/lpt/Anindya/myModels_Trained/model_s10.keras')
+###############################################################################
+#save and load training history
+import pickle
+
+with open('/home/lpt/Anindya/myModels_Trained/trainHistoryDict_s10', 'wb') as file_pi:
+    pickle.dump(history_10.history, file_pi)
+
+with open('/home/lpt/Anindya/myModels_Trained/trainHistoryDict_s10', 'rb') as file_pi:
+    history_10 = pickle.load(file_pi)
+
+###############################################################################
+# r2 score on test data
+y_pred = model_10.predict(X_test, verbose=1)
+y_pred_sq = np.squeeze(y_pred, axis=3)
+y_pred_reshape = y_pred_sq.reshape(-1)
+y_test_reshape = y_test.reshape(-1)
+r2_0 = r2_score(y_test_reshape, y_pred_reshape)
+
+# r2 score on training data
+y_pred = model_10.predict(X_train, verbose=1)
+y_pred_sq = np.squeeze(y_pred, axis=3)
+y_pred_reshape = y_pred_sq.reshape(-1)
+y_train_reshape = y_train.reshape(-1)
+r2_0_train = r2_score(y_train_reshape, y_pred_reshape)
+
+###############################################################################
+# plot the training and validation loss at each epoch
+loss = history_10.history['loss']
+val_loss = history_10.history['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, loss, 'y', label='Training loss')
+plt.plot(epochs, val_loss, 'r', label='Validation loss')
+plt.title('Training and validation loss - Multiple image input')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+# plot the training and validation loss in log scale
+loss = history_10.history['loss']
+val_loss = history_10.history['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, np.log(loss), 'y', label='Training loss')
+plt.plot(epochs, np.log(val_loss), 'r', label='Validation loss')
+plt.title('Training and validation loss - Multiple image input')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+###############################################################################
+# predicted result on test
+pred_test = model_10.predict(X_test, verbose=1)
+
+# Perform a sanity check on some random validation samples
+# Input image
+ix = random.randint(0, (X_test.shape[0]))
+X_test_ix = X_test[ix, :, :, 0] # taking only the 'z=0' image of the input image-stack
+plt.imshow(X_test_ix, cmap='gray')
+plt.show()
+
+# Ground-truth depth matrix
+y_test_ix = y_test[ix]
+y_test_ix = y_test_ix * 255
+plt.imshow(y_test_ix, cmap='YlOrBr')
+plt.colorbar()
+plt.show()
+
+# Predicted depth matrix
+pred_test_ix = pred_test[ix]
+pred_test_ix = pred_test_ix * 255
+plt.imshow(pred_test_ix, cmap='YlOrBr')
+plt.colorbar()
+plt.title('Predicted depth profile - Multiple image input')
+plt.show()
+
+# Prediction error
+pred_test_ix_sq = np.squeeze(pred_test_ix, axis=2)
+error_ix = pred_test_ix_sq - y_test_ix
+plt.imshow(error_ix, cmap='YlOrBr')
+plt.colorbar()
+plt.title('Prediction error - Multiple image input')
+plt.show()
+
+###############################################################################
+# Saving the result
+result_path = '/home/lpt/Anindya/Results/Dataset_04'
+result_path = '/home/lpt/Anindya/Results/Dataset_04_Test_3'
+
+np.savetxt(result_path + '/Frame_46.csv', X_test_ix, delimiter=',')
+np.savetxt(result_path + '/Depth_46.csv', y_test_ix, delimiter=',')
+np.savetxt(result_path + '/Pred_0_Depth_46.csv',
+           pred_test_ix_sq, delimiter=',')
+np.savetxt(result_path + '/Error_0_46.csv', error_ix, delimiter=',')
