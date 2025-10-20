@@ -5,11 +5,11 @@ The study shows that a surface with varying height profile, when covered with a 
 The multiple focal stacked images can be used as input of a trained model to predict the depth map.
 For comparing the results, three different models were used with three different input shapes: 
 
-256 x 256 x 10  # stack of 10 images as input
+256 x 256 x 10  (stack of 10 images as input)
 
-256 x 256 x 5  # stack of 5 images as input
+256 x 256 x 5  (stack of 5 images as input)
 
-256 x 256 x 1  # single image as input
+256 x 256 x 1  (single image as input)
 
 The model gives an output of the shape:
 
