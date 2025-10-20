@@ -30,9 +30,9 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
 # load data
-X_train, y_train = dataset_train
-X_test, y_test = dataset_test
-# X_train, X_test, y_train, y_test = train_test_split(dataset, test_size=0.20, random_state=0)
+X_train, y_train = dataset_train # Training dataset with image-stack and ground-truth depth matrix
+X_test, y_test = dataset_test # Testing dataset with image-stack and ground-truth depth matrix
+# X_train, X_test, y_train, y_test = train_test_split(dataset, test_size=0.20, random_state=0) # if Train-Test is to be split from a main dataset
 ###############################################################################
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
@@ -133,17 +133,17 @@ execution_time = stop1-start1
 print("Execution time is: ", execution_time)
 ###############################################################################
 #Save model .keras
-model_10.save('/home/lpt/Anindya/myModels_Trained/model_s10.keras')
+model_10.save('/home/aniphysics09/myModels_Trained/model_s10.keras')
 # load model
-model_10 = keras.models.load_model('/home/lpt/Anindya/myModels_Trained/model_s10.keras')
+model_10 = keras.models.load_model('/home/aniphysics09/myModels_Trained/model_s10.keras')
 ###############################################################################
 #save and load training history
 import pickle
 
-with open('/home/lpt/Anindya/myModels_Trained/trainHistoryDict_s10', 'wb') as file_pi:
+with open('/home/aniphysics09/myModels_Trained/trainHistoryDict_s10', 'wb') as file_pi:
     pickle.dump(history_10.history, file_pi)
 
-with open('/home/lpt/Anindya/myModels_Trained/trainHistoryDict_s10', 'rb') as file_pi:
+with open('/home/aniphysics09/myModels_Trained/trainHistoryDict_s10', 'rb') as file_pi:
     history_10 = pickle.load(file_pi)
 
 ###############################################################################
@@ -219,14 +219,3 @@ plt.imshow(error_ix, cmap='YlOrBr')
 plt.colorbar()
 plt.title('Prediction error - Multiple image input')
 plt.show()
-
-###############################################################################
-# Saving the result
-result_path = '/home/lpt/Anindya/Results/Dataset_04'
-result_path = '/home/lpt/Anindya/Results/Dataset_04_Test_3'
-
-np.savetxt(result_path + '/Frame_46.csv', X_test_ix, delimiter=',')
-np.savetxt(result_path + '/Depth_46.csv', y_test_ix, delimiter=',')
-np.savetxt(result_path + '/Pred_0_Depth_46.csv',
-           pred_test_ix_sq, delimiter=',')
-np.savetxt(result_path + '/Error_0_46.csv', error_ix, delimiter=',')
