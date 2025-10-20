@@ -11,4 +11,4 @@ For comparing the results, three different models were used with three different
 The model gives an output of the shape:
 256 x 256 x 1
 
-The files 'Depth_from_ImageStack_10', 'Depth_from_ImageStack_5' and 'Depth_from_SingleImage' contains the models and their results for the three corresponding cases
+The files 'Depth_from_ImageStack_10', 'Depth_from_ImageStack_5' and 'Depth_from_SingleImage' contain the models and their results for the three corresponding cases
