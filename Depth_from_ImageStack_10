@@ -124,7 +124,7 @@ model_10.summary()
 start1 = datetime.now()
 ###############################################################################
 # Train the model
-history_10 = model_10.fit(X_train, y_train, batch_size=16, epochs=500, verbose=1,
+history_10 = model_10.fit(X_train, y_train, batch_size=16, epochs=1000, verbose=1,
                         validation_data=(X_test, y_test))
 ###############################################################################
 stop1 = datetime.now()
