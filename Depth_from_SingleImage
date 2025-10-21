@@ -32,7 +32,7 @@ from sklearn.model_selection import train_test_split
 # load data
 X_train_1, y_train_1 = dataset_train_1
 X_test_1, y_test_1 = dataset_test_1
-# X_train, X_test, y_train, y_test = train_test_split(dataset, test_size=0.20, random_state=0)
+# X_train, X_test, y_train, y_test = train_test_split(dataset, test_size=0.20, random_state=0) # if Train-Test is to be split from a main dataset
 ###############################################################################
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
