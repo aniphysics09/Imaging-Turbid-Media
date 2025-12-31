@@ -1,6 +1,9 @@
 The Python codes in this repository contains the U-net based models trained for estimation of depth-map from microscopic images. The results of these models are published here:
 https://doi.org/10.1117/12.3029573
 
+<img width="701" height="569" alt="Figure_1A_" src="https://github.com/user-attachments/assets/0c66ee3b-2258-4560-8ed1-8d2f7be9601b" />
+
+
 The study shows that a surface with varying height profile, when covered with a turbid medium, imaged at different focal planes of a microscope. 
 The multiple focal stacked images can be used as input of a trained model to predict the depth map.
 For comparing the results, three different models were used with three different input shapes: 
