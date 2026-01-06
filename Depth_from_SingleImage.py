@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan  9 16:22:27 2024
-
-@author: aniph
-"""
 
 # import libraries
 from datetime import datetime
